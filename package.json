@@ -6,7 +6,11 @@
   "type": "module",
   "scripts": {
     "acceptance:live": "node scripts/acceptance-live.mjs",
-    "audit:repo-family": "node scripts/audit-repo-family.mjs"
+    "acceptance:live:quiet": "QRV_ACCEPTANCE_MIN_DELAY_MS=2500 QRV_ACCEPTANCE_MAX_DELAY_MS=5000 QRV_ACCEPTANCE_RETRIES=2 node scripts/acceptance-live.mjs",
+    "acceptance:verify-demo": "QRV_ACCEPTANCE_INCLUDE_DEMO=1 node scripts/acceptance-live.mjs",
+    "audit:repo-family": "node scripts/audit-repo-family.mjs",
+    "audit:repo-family:strict": "QRV_AUDIT_STRICT=1 node scripts/audit-repo-family.mjs",
+    "ops:check": "npm run audit:repo-family && npm run acceptance:live:quiet"
   },
   "engines": {
     "node": ">=20"
