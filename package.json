@@ -1,0 +1,14 @@
+{
+  "name": "qrv-infra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Infrastructure, deployment, monitoring, and operations tooling for the QR-V Global Verification Network.",
+  "type": "module",
+  "scripts": {
+    "acceptance:live": "node scripts/acceptance-live.mjs",
+    "audit:repo-family": "node scripts/audit-repo-family.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
