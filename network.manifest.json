@@ -21,6 +21,7 @@
         "/verify/:qrvid",
         "/issuer",
         "/issuer/dashboard",
+        "/issuer/records",
         "/registry",
         "/explorer",
         "/docs",
@@ -28,6 +29,9 @@
         "/api-reference",
         "/pricing",
         "/store",
+        "/billing",
+        "/wallet",
+        "/admin",
         "/status"
       ],
       "healthPaths": ["/health", "/healthz", "/readyz", "/version"]
@@ -56,9 +60,11 @@
     "docs.qrv.network": "https://qrv.network/docs",
     "developers.qrv.network": "https://qrv.network/developers",
     "status.qrv.network": "https://qrv.network/status",
-    "store.qrv.network": "https://qrv.network/store"
+    "store.qrv.network": "https://qrv.network/store",
+    "wallet.qrv.network": "https://qrv.network/wallet",
+    "admin.qrv.network": "https://qrv.network/admin"
   },
-  "sourceArchives": [
+  "sourceModules": [
     "ohi-stack/qrv-verify",
     "ohi-stack/qrv-registry",
     "ohi-stack/issuer-qrv",
@@ -66,7 +72,10 @@
     "ohi-stack/qrv-developer-portal",
     "ohi-stack/qrv-explorer",
     "ohi-stack/qrv-status",
-    "ohi-stack/qrv-marketing-site"
+    "ohi-stack/qrv-marketing-site",
+    "ohi-stack/qrv-billing",
+    "ohi-stack/qrv-admin",
+    "ohi-stack/qrv-wallet"
   ],
   "deterministicPublicStatuses": ["VERIFIED", "REVOKED", "EXPIRED", "NOT_FOUND"],
   "lastUpdated": "2026-08-08T18:26:00Z"
