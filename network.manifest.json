@@ -4,83 +4,70 @@
   "standard": "QVS-1.0",
   "owner": "ONEGODIAN, LLC",
   "rootDomain": "qrv.network",
+  "architecture": "two-node-consolidated",
   "canonicalDemoQrvid": "QRV-PROD-CERT-000001",
+  "canonicalVerificationUrl": "https://qrv.network/verify/QRV-PROD-CERT-000001",
   "statusPage": "https://qrv.network/status",
   "services": [
     {
-      "id": "root",
+      "id": "platform",
       "repository": "ohi-stack/qrv-node",
       "baseUrl": "https://qrv.network",
-      "role": "public-root-hub",
+      "role": "public-platform-node",
       "required": true,
-      "healthPaths": ["/health", "/healthz", "/readyz", "/version", "/ping"]
-    },
-    {
-      "id": "verify",
-      "repository": "ohi-stack/qrv-verify",
-      "baseUrl": "https://verify.qrv.network",
-      "role": "public-verification",
-      "required": true,
-      "healthPaths": ["/health", "/healthz", "/readyz", "/version", "/ping"]
+      "routes": [
+        "/",
+        "/verify",
+        "/verify/:qrvid",
+        "/issuer",
+        "/issuer/dashboard",
+        "/registry",
+        "/explorer",
+        "/docs",
+        "/developers",
+        "/api-reference",
+        "/pricing",
+        "/store",
+        "/status"
+      ],
+      "healthPaths": ["/health", "/healthz", "/readyz", "/version"]
     },
     {
       "id": "api",
       "repository": "ohi-stack/qrv-api",
       "baseUrl": "https://api.qrv.network",
-      "role": "canonical-api",
+      "role": "canonical-api-registry-node",
       "required": true,
-      "healthPaths": ["/health", "/healthz", "/readyz", "/version", "/ping"]
-    },
-    {
-      "id": "registry",
-      "repository": "ohi-stack/qrv-registry",
-      "baseUrl": "https://registry.qrv.network",
-      "role": "canonical-registry",
-      "required": true,
-      "healthPaths": ["/health", "/healthz", "/readyz", "/version", "/ping"]
-    },
-    {
-      "id": "issuer",
-      "repository": "ohi-stack/issuer-qrv",
-      "baseUrl": "https://issuer.qrv.network",
-      "role": "authenticated-issuer-portal",
-      "required": true,
+      "routes": [
+        "/api/v1/verify/:qrvid",
+        "/api/v1/records/:qrvid",
+        "/api/v1/records",
+        "/api/v1/records/:qrvid/revoke",
+        "/api/v1/audit/:qrvid"
+      ],
       "healthPaths": ["/health", "/healthz", "/readyz", "/version"]
-    },
-    {
-      "id": "explorer",
-      "repository": "ohi-stack/qrv-explorer",
-      "baseUrl": "https://explorer.qrv.network",
-      "role": "public-registry-explorer",
-      "required": false,
-      "healthPaths": ["/health", "/healthz", "/version"]
-    },
-    {
-      "id": "docs",
-      "repository": "ohi-stack/qrv-docs",
-      "baseUrl": "https://docs.qrv.network",
-      "role": "standards-and-documentation",
-      "required": false,
-      "healthPaths": ["/health", "/healthz", "/version"]
-    },
-    {
-      "id": "developers",
-      "repository": "ohi-stack/qrv-developer-portal",
-      "baseUrl": "https://developers.qrv.network",
-      "role": "developer-portal",
-      "required": false,
-      "healthPaths": ["/health", "/healthz", "/version"]
     }
   ],
-  "deterministicStatuses": [
-    "VERIFIED",
-    "REVOKED",
-    "EXPIRED",
-    "NOT_FOUND",
-    "INVALID_FORMAT",
-    "INVALID_SIGNATURE",
-    "SUSPENDED_ISSUER",
-    "UNAVAILABLE"
+  "legacyAliases": {
+    "verify.qrv.network": "https://qrv.network/verify",
+    "issuer.qrv.network": "https://qrv.network/issuer",
+    "registry.qrv.network": "https://qrv.network/registry",
+    "explorer.qrv.network": "https://qrv.network/explorer",
+    "docs.qrv.network": "https://qrv.network/docs",
+    "developers.qrv.network": "https://qrv.network/developers",
+    "status.qrv.network": "https://qrv.network/status",
+    "store.qrv.network": "https://qrv.network/store"
+  },
+  "sourceArchives": [
+    "ohi-stack/qrv-verify",
+    "ohi-stack/qrv-registry",
+    "ohi-stack/issuer-qrv",
+    "ohi-stack/qrv-docs",
+    "ohi-stack/qrv-developer-portal",
+    "ohi-stack/qrv-explorer",
+    "ohi-stack/qrv-status",
+    "ohi-stack/qrv-marketing-site"
   ],
-  "lastUpdated": "2026-08-01T04:29:00Z"
+  "deterministicPublicStatuses": ["VERIFIED", "REVOKED", "EXPIRED", "NOT_FOUND"],
+  "lastUpdated": "2026-08-08T18:26:00Z"
 }
