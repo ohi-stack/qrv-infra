@@ -1,77 +1,143 @@
 # QR-V™ Infrastructure
 
-Infrastructure, deployment, DNS, environments, monitoring, secrets management, CI/CD, and operations controls for the QR-V™ Global Verification Network.
+The QR-V™ Global Verification Network now targets a **two-node production topology**.
 
-## Canonical Production Topology
+## Canonical production topology
 
-| Service | Production role | Public route |
+| Node | Repository | Role |
 |---|---|---|
-| `qrv.network` | Root network hub, public content, pricing, use cases, status | `/` |
-| `verify.qrv.network` | Public QRVID verification and result pages | `/{qrvid}` |
-| `api.qrv.network` | Canonical REST API and mutation authority | `/api/v1/*` |
-| `registry.qrv.network` | Canonical registry and read-only record inspection | `/records/{qrvid}` |
-| `issuer.qrv.network` | Authenticated issuer portal | `/login` |
-| `explorer.qrv.network` | Public registry explorer | `/search` |
-| `docs.qrv.network` | Protocol, standard, architecture, and API documentation | `/` |
-| `developers.qrv.network` | SDKs, integration guides, examples, and sandbox access | `/` |
-| `qrv.network/status` | Public service-status page during consolidated deployment | `/status` |
+| `qrv.network` | `ohi-stack/qrv-node` | All human-facing application routes |
+| `api.qrv.network` | `ohi-stack/qrv-api` | Canonical API, registry persistence, lifecycle mutation, and audit access |
 
-## Consolidation Policy
+### Platform routes
 
-Use `qrv.network/{page}` for public education, SEO, conversion, pricing, status, and use-case pages.
+```text
+qrv.network/
+qrv.network/verify
+qrv.network/verify/{qrvid}
+qrv.network/issuer
+qrv.network/issuer/dashboard
+qrv.network/issuer/records
+qrv.network/registry
+qrv.network/explorer
+qrv.network/docs
+qrv.network/developers
+qrv.network/api-reference
+qrv.network/pricing
+qrv.network/store
+qrv.network/status
+```
 
-Keep the following operational services separated because they have distinct security, availability, or authentication boundaries:
+### API routes
 
-- `api.qrv.network`
-- `verify.qrv.network`
-- `registry.qrv.network`
-- `issuer.qrv.network`
-- `admin.qrv.network`
+```text
+api.qrv.network/healthz
+api.qrv.network/readyz
+api.qrv.network/version
+api.qrv.network/api/v1/verify/{qrvid}
+api.qrv.network/api/v1/records/{qrvid}
+api.qrv.network/api/v1/records
+api.qrv.network/api/v1/records/{qrvid}/revoke
+api.qrv.network/api/v1/audit/{qrvid}
+```
 
-## Production Deployment Order
+## Database boundary
 
-1. Database migrations and registry readiness.
-2. API health, readiness, and canonical verification contract.
-3. Public verifier and canonical demo QRVID.
-4. Issuer create → QR → verify → revoke lifecycle.
-5. Root site, documentation, explorer, and status surfaces.
-6. Billing, white-label deployments, and commercial automation.
+PostgreSQL / Google Cloud SQL is private infrastructure behind `api.qrv.network`.
 
-## Mandatory Go-Live Gate
+`qrv.network` must not receive database credentials. It calls the API server-to-server for issuance, lookup, verification, revocation, and authorized record listing.
 
-The network is production-ready only when all of the following pass:
+## Legacy subdomain migration
 
-- `qrv.network/healthz` returns healthy JSON.
-- `qrv.network/readyz` returns ready JSON.
-- `api.qrv.network/healthz` returns healthy JSON.
-- `verify.qrv.network/healthz` returns healthy JSON.
-- `verify.qrv.network/readyz` confirms registry access.
-- `QRV-PROD-CERT-000001` returns a deterministic result.
-- An issuer can create a certificate without direct database access.
-- The generated QR resolves to the public verification URL.
-- Revocation changes the result to `REVOKED`.
-- Create, verify, and revoke events are audit logged.
+The following names are compatibility aliases only and should no longer require separate applications:
 
-## Environment Rules
+```text
+verify.qrv.network      → qrv.network/verify
+issuer.qrv.network      → qrv.network/issuer
+registry.qrv.network    → qrv.network/registry
+explorer.qrv.network    → qrv.network/explorer
+docs.qrv.network        → qrv.network/docs
+developers.qrv.network  → qrv.network/developers
+status.qrv.network      → qrv.network/status
+store.qrv.network       → qrv.network/store
+```
 
-- Node.js 20 or later.
-- Bind HTTP services to `0.0.0.0` and `process.env.PORT`.
-- Store secrets only in deployment environment variables or a secrets manager.
-- Permit only explicit production CORS origins.
-- Require TLS for every public service.
-- Use Gregorian/UTC timestamps as the canonical operational time reference.
-- Treat OneGodian Time™ as supplemental display metadata only where configured.
+Point any legacy hostnames that must remain reachable to the same `qrv-node` deployment. The platform code issues HTTP 308 redirects to the canonical `qrv.network` path. This preserves old bookmarks and previously encoded verification URLs while eliminating separate runtime nodes.
 
-## Repository Responsibilities
+## Canonical QR payload
 
-- `qrv-node`: root hub and public route consolidation.
-- `qrv-api`: canonical application API.
-- `qrv-registry`: schema, migrations, persistence, and registry queries.
-- `qrv-verify`: public verification UX.
-- `issuer-qrv`: issuer control plane.
-- `qrv-docs`: standards and implementation documentation.
-- `qrv-security`: security policy and threat model.
-- `qrv-status`: monitoring and incident presentation.
-- `qrv-demo-records`: deterministic fixtures and seed records.
+New QR-V records should use:
 
-See `network.manifest.json` and `PRODUCTION_RUNBOOK.md` for machine-readable service definitions and operating procedures.
+```text
+https://qrv.network/verify/{QRVID}
+```
+
+## Active repository responsibilities
+
+### `qrv-node`
+
+- public website;
+- verification UI;
+- registry/explorer UI;
+- issuer portal;
+- docs and developer pages;
+- pricing and store pages;
+- public status;
+- QR generation;
+- compatibility redirects.
+
+### `qrv-api`
+
+- PostgreSQL connection;
+- registry migrations;
+- record issuance;
+- record lookup;
+- deterministic verification state;
+- revocation;
+- audit access;
+- server-side authorization;
+- health/readiness.
+
+## Source/archive repositories
+
+The following repositories remain useful as implementation history or migration sources but are no longer required as separate production nodes:
+
+- `qrv-verify`
+- `qrv-registry`
+- `issuer-qrv`
+- `qrv-docs`
+- `qrv-developer-portal`
+- `qrv-explorer`
+- `qrv-status`
+- `qrv-marketing-site`
+
+Do not delete them until the consolidated production acceptance test passes and all required content has been migrated.
+
+## Deployment order
+
+1. Deploy `qrv-api` with `DATABASE_URL` and `QRV_PLATFORM_API_KEY`.
+2. Run `npm run migrate` in `qrv-api`.
+3. Confirm `api.qrv.network/healthz` and `/readyz`.
+4. Deploy `qrv-node` to `qrv.network`.
+5. Configure the same `QRV_PLATFORM_API_KEY` on `qrv-node`.
+6. Configure `SESSION_SECRET` and `ISSUER_ACCESS_CODE` on `qrv-node`.
+7. Confirm `qrv.network/readyz`.
+8. Issue a certificate from `qrv.network/issuer`.
+9. Confirm `qrv.network/verify/{QRVID}` returns `VERIFIED`.
+10. Revoke the record and confirm the same URL returns `REVOKED`.
+11. Point legacy subdomains to the platform app if backward-compatible redirects are required.
+
+## Mandatory production gate
+
+```text
+ISSUER LOGIN
+→ CREATE RECORD
+→ GENERATE QRVID
+→ GENERATE QR
+→ VERIFIED
+→ REVOKE
+→ REVOKED
+→ AUDIT EVENTS PRESENT
+```
+
+No additional public node is required for this lifecycle.
