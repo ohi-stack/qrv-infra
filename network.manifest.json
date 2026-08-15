@@ -8,6 +8,22 @@
   "canonicalDemoQrvid": "QRV-PROD-CERT-000001",
   "canonicalVerificationUrl": "https://qrv.network/verify/QRV-PROD-CERT-000001",
   "statusPage": "https://qrv.network/status",
+  "productionDelivery": {
+    "platformHostname": "qrv.network",
+    "platformRepository": "ohi-stack/qrv-node",
+    "apiHostname": "api.qrv.network",
+    "apiRepository": "ohi-stack/qrv-api",
+    "singlePlatformOriginRequired": true,
+    "duplicateRootOriginsForbidden": true,
+    "desktopMobileParityRequired": true,
+    "canonicalHomepageMarker": "QR-V™ NETWORK",
+    "forbiddenLegacyHomepageMarkers": [
+      "Verify Records. Confirm Authenticity. Instantly.",
+      "CERTIFICATES • CREDENTIALS • PRODUCTS • ASSETS • DOCUMENTS • PROPERTY TITLES • FINANCIAL RECORDS"
+    ],
+    "rootHtmlCachePolicy": "no-cache, max-age=0, must-revalidate",
+    "cachePurgeRequiredAfterOriginChange": true
+  },
   "services": [
     {
       "id": "platform",
@@ -77,6 +93,13 @@
     "ohi-stack/qrv-admin",
     "ohi-stack/qrv-wallet"
   ],
+  "forbiddenProductionRootRepositories": [
+    "ohi-stack/qrv-marketing-site",
+    "ohi-stack/qrv-verify",
+    "ohi-stack/issuer-qrv",
+    "ohi-stack/qrv-registry",
+    "ohi-stack/qrv-explorer"
+  ],
   "deterministicPublicStatuses": ["VERIFIED", "REVOKED", "EXPIRED", "NOT_FOUND"],
-  "lastUpdated": "2026-08-08T18:26:00Z"
+  "lastUpdated": "2026-08-15T14:41:00Z"
 }
