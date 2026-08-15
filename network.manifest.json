@@ -8,9 +8,29 @@
   "canonicalDemoQrvid": "QRV-PROD-CERT-000001",
   "canonicalVerificationUrl": "https://qrv.network/verify/QRV-PROD-CERT-000001",
   "statusPage": "https://qrv.network/status",
+  "siteSource": {
+    "chatgptSitesProject": "qrv-global-verification",
+    "repository": "ohi-stack/qrv-marketing-site",
+    "repositoryPath": "sites/qrv-global-verification",
+    "role": "canonical-public-site-source",
+    "direction": "ChatGPT Sites -> qrv-marketing-site",
+    "owns": [
+      "public page source",
+      "header and mega menu",
+      "mobile navigation",
+      "footer",
+      "brand assets",
+      "hero animations",
+      "network visualizations",
+      "public content",
+      "pricing presentation",
+      "SEO metadata"
+    ]
+  },
   "productionDelivery": {
     "platformHostname": "qrv.network",
     "platformRepository": "ohi-stack/qrv-node",
+    "publicSiteSourceRepository": "ohi-stack/qrv-marketing-site",
     "apiHostname": "api.qrv.network",
     "apiRepository": "ohi-stack/qrv-api",
     "singlePlatformOriginRequired": true,
@@ -22,14 +42,15 @@
       "CERTIFICATES • CREDENTIALS • PRODUCTS • ASSETS • DOCUMENTS • PROPERTY TITLES • FINANCIAL RECORDS"
     ],
     "rootHtmlCachePolicy": "no-cache, max-age=0, must-revalidate",
-    "cachePurgeRequiredAfterOriginChange": true
+    "cachePurgeRequiredAfterOriginChange": true,
+    "sourceIntegrationRule": "Public website source changes originate in qrv-marketing-site and are integrated into the deployed platform runtime through a controlled build/deployment step."
   },
   "services": [
     {
       "id": "platform",
       "repository": "ohi-stack/qrv-node",
       "baseUrl": "https://qrv.network",
-      "role": "public-platform-node",
+      "role": "public-platform-runtime",
       "required": true,
       "routes": [
         "/",
@@ -81,6 +102,7 @@
     "admin.qrv.network": "https://qrv.network/admin"
   },
   "sourceModules": [
+    "ohi-stack/qrv-marketing-site",
     "ohi-stack/qrv-verify",
     "ohi-stack/qrv-registry",
     "ohi-stack/issuer-qrv",
@@ -88,7 +110,6 @@
     "ohi-stack/qrv-developer-portal",
     "ohi-stack/qrv-explorer",
     "ohi-stack/qrv-status",
-    "ohi-stack/qrv-marketing-site",
     "ohi-stack/qrv-billing",
     "ohi-stack/qrv-admin",
     "ohi-stack/qrv-wallet"
@@ -101,5 +122,5 @@
     "ohi-stack/qrv-explorer"
   ],
   "deterministicPublicStatuses": ["VERIFIED", "REVOKED", "EXPIRED", "NOT_FOUND"],
-  "lastUpdated": "2026-08-15T14:41:00Z"
+  "lastUpdated": "2026-08-15T14:49:00Z"
 }
