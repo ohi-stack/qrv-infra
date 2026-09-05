@@ -12,12 +12,14 @@
   "canonicalApiBaseUrl": "https://api.qrv.network/api/v1",
   "statusPage": "https://qrv.network/status",
   "canonicalDatastore": {
-    "type": "postgresql",
-    "deployment": "managed-postgresql-or-google-cloud-sql",
+    "preferredType": "supabase-postgres",
+    "supportedTypes": ["supabase-postgres", "postgres"],
     "authority": "api.qrv.network",
-    "connectionVariable": "DATABASE_URL",
     "singleWritableAuthorityRequired": true,
-    "supabasePolicy": "optional-replacement-adapter-not-additive",
+    "supabaseProjectUrlVariable": "SUPABASE_URL",
+    "supabaseServerSecretVariable": "SUPABASE_SECRET_KEY",
+    "postgresConnectionVariable": "DATABASE_URL",
+    "sameProjectRequirement": "When supabase-postgres is selected, DATABASE_URL must point to the PostgreSQL database belonging to the same project named by SUPABASE_URL.",
     "competingWritableRegistriesForbidden": true
   },
   "securityBoundary": {
@@ -28,7 +30,8 @@
     "browserMayReceiveSigningPrivateKeys": false,
     "browserMayReceiveWebhookSecrets": false,
     "browserMayReceivePrivilegedApiKeys": false,
-    "serverToServerKey": "QRV_PLATFORM_API_KEY",
+    "canonicalServerApiKey": "QRV_API_KEY",
+    "compatibilityServerApiKey": "QRV_PLATFORM_API_KEY",
     "databaseCredentialsAllowedOnlyOnApiNode": true
   },
   "environmentContracts": {
@@ -37,12 +40,21 @@
         "NODE_ENV",
         "PORT",
         "APP_VERSION",
+        "APP_BASE_URL",
         "QRV_PLATFORM_ORIGIN",
+        "API_BASE_URL",
         "QRV_API_BASE_URL",
+        "VERIFY_BASE_URL",
+        "REGISTRY_BASE_URL",
+        "ISSUER_BASE_URL",
+        "DOCS_BASE_URL",
+        "DEVELOPERS_BASE_URL",
+        "STATUS_BASE_URL",
         "QRV_PLATFORM_API_KEY",
         "SESSION_SECRET",
         "ISSUER_ACCESS_CODE",
-        "SESSION_TTL_MS"
+        "SESSION_TTL_MS",
+        "LOG_LEVEL"
       ],
       "forbiddenSecretClasses": [
         "DATABASE_URL",
@@ -58,19 +70,29 @@
         "NODE_ENV",
         "PORT",
         "APP_VERSION",
+        "QRV_API_BASE_URL",
+        "QRV_PUBLIC_BASE_URL",
         "QRV_PLATFORM_ORIGIN",
+        "QRV_VERIFY_BASE_URL",
+        "QRV_REGISTRY_BASE_URL",
+        "QRV_DATA_BACKEND",
+        "SUPABASE_URL",
+        "SUPABASE_SECRET_KEY",
         "DATABASE_URL",
         "DATABASE_POOL_MAX",
         "PG_CONNECTION_TIMEOUT_MS",
         "PG_IDLE_TIMEOUT_MS",
         "PGSSLMODE",
+        "QRV_API_KEY",
         "QRV_PLATFORM_API_KEY",
+        "QRV_WEBHOOK_SECRET",
+        "CORS_ORIGINS",
         "CORS_ALLOWED_ORIGINS",
+        "LOG_LEVEL",
         "PUBLIC_RATE_WINDOW_MS",
         "PUBLIC_RATE_LIMIT"
       ],
       "futureBackendOnly": [
-        "QRV_WEBHOOK_SECRET",
         "JWT_SECRET",
         "QRV_SIGNING_PRIVATE_KEY",
         "QRV_SIGNING_KEY_ID",
@@ -144,6 +166,11 @@
       "healthPaths": ["/health", "/healthz", "/readyz", "/version"]
     }
   ],
+  "compatibilityApiProxy": {
+    "publicPrefix": "https://qrv.network/api/v1",
+    "authoritativeTarget": "https://api.qrv.network/api/v1",
+    "mode": "proxy-or-redirect-without-backend-duplication"
+  },
   "legacyAliasMode": "redirect-only-http-308",
   "legacyAliases": {
     "verify.qrv.network": "https://qrv.network/verify",
@@ -177,22 +204,8 @@
     "ohi-stack/qrv-registry",
     "ohi-stack/qrv-explorer"
   ],
-  "currentDeterministicPublicStatuses": [
-    "VERIFIED",
-    "REVOKED",
-    "EXPIRED",
-    "NOT_FOUND"
-  ],
-  "productionTargetStatuses": [
-    "VERIFIED",
-    "REVOKED",
-    "EXPIRED",
-    "NOT_FOUND",
-    "INVALID_FORMAT",
-    "INVALID_SIGNATURE",
-    "SUSPENDED_ISSUER",
-    "UNAVAILABLE"
-  ],
+  "currentDeterministicPublicStatuses": ["VERIFIED", "REVOKED", "EXPIRED", "NOT_FOUND"],
+  "productionTargetStatuses": ["VERIFIED", "REVOKED", "EXPIRED", "NOT_FOUND", "INVALID_FORMAT", "INVALID_SIGNATURE", "SUSPENDED_ISSUER", "UNAVAILABLE"],
   "cryptography": {
     "sha256": "active",
     "ed25519": "required-production-gate",
