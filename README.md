@@ -211,6 +211,12 @@ These repositories remain implementation history, source modules, or migration i
 
 Do not delete source repositories until consolidated production acceptance passes and required content has been migrated.
 
+### Source-runtime protection
+
+Source repositories must not be capable of silently becoming competing production origins. `qrv-marketing-site` now blocks `npm start` unless `QRV_ALLOW_SOURCE_PREVIEW=1` is explicitly set for a non-production preview. The production `qrv.network` Hostinger application must never set that variable.
+
+This control exists to prevent split-origin behavior such as desktop and mobile clients receiving different QR-V builds from different deployments.
+
 ## Cryptographic status
 
 SHA-256 integrity support is active in the current implementation. Ed25519 issuer signing remains a required production gate.
