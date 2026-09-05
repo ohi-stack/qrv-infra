@@ -1,15 +1,30 @@
 # QR-V™ Infrastructure
 
-The QR-V™ Global Verification Network now targets a **two-node production topology**.
+The QR-V™ Global Verification Network uses a **strict two-node production topology**.
+
+> `qrv.network` = public platform / application layer  
+> `api.qrv.network` = trusted backend / API / canonical data boundary
+
+No other QR-V hostname should run an independent production application unless a future architecture revision explicitly changes this contract.
 
 ## Canonical production topology
 
 | Node | Repository | Role |
 |---|---|---|
-| `qrv.network` | `ohi-stack/qrv-node` | All human-facing application routes |
-| `api.qrv.network` | `ohi-stack/qrv-api` | Canonical API, registry persistence, lifecycle mutation, and audit access |
+| `qrv.network` | `ohi-stack/qrv-node` | All human-facing application routes and issuer workflows |
+| `api.qrv.network` | `ohi-stack/qrv-api` | Canonical API, registry persistence, verification logic, lifecycle mutation, audit, cryptographic operations, and privileged backend integrations |
 
-### Platform routes
+```text
+Browser / QR scan / issuer user
+              ↓
+        https://qrv.network
+              ↓ authenticated server-to-server calls
+https://api.qrv.network/api/v1
+              ↓
+     Canonical QR-V registry
+```
+
+## Platform routes
 
 ```text
 qrv.network/
@@ -23,33 +38,113 @@ qrv.network/explorer
 qrv.network/docs
 qrv.network/developers
 qrv.network/api-reference
+qrv.network/protocol
+qrv.network/standards
+qrv.network/security
+qrv.network/use-cases
 qrv.network/pricing
 qrv.network/store
+qrv.network/billing
+qrv.network/wallet
+qrv.network/admin
 qrv.network/status
+qrv.network/about
 ```
 
-### API routes
+New QR-V codes must encode:
 
 ```text
-api.qrv.network/healthz
-api.qrv.network/readyz
-api.qrv.network/version
-api.qrv.network/api/v1/verify/{qrvid}
-api.qrv.network/api/v1/records/{qrvid}
-api.qrv.network/api/v1/records
-api.qrv.network/api/v1/records/{qrvid}/revoke
-api.qrv.network/api/v1/audit/{qrvid}
+https://qrv.network/verify/{QRVID}
 ```
 
-## Database boundary
+## API routes
 
-PostgreSQL / Google Cloud SQL is private infrastructure behind `api.qrv.network`.
+Canonical API base:
 
-`qrv.network` must not receive database credentials. It calls the API server-to-server for issuance, lookup, verification, revocation, and authorized record listing.
+```text
+https://api.qrv.network/api/v1
+```
+
+Current core routes:
+
+```text
+GET  /healthz
+GET  /readyz
+GET  /version
+GET  /api/v1/verify/{qrvid}
+GET  /api/v1/records/{qrvid}
+GET  /api/v1/records
+POST /api/v1/records
+POST /api/v1/records/{qrvid}/revoke
+GET  /api/v1/audit/{qrvid}
+```
+
+## Environment boundary
+
+### `qrv.network`
+
+Expected server configuration:
+
+```env
+NODE_ENV=production
+PORT=3000
+APP_VERSION=1.0.0
+QRV_PLATFORM_ORIGIN=https://qrv.network
+QRV_API_BASE_URL=https://api.qrv.network/api/v1
+QRV_PLATFORM_API_KEY=
+SESSION_SECRET=
+ISSUER_ACCESS_CODE=
+SESSION_TTL_MS=43200000
+```
+
+The platform node must **not** receive:
+
+```text
+DATABASE_URL
+SUPABASE_SECRET_KEY
+QRV_SIGNING_PRIVATE_KEY
+QRV_WEBHOOK_SECRET
+database-admin credentials
+payment-provider secrets
+```
+
+`QRV_PLATFORM_API_KEY` is server-to-server only and must never be exposed to browser JavaScript.
+
+### `api.qrv.network`
+
+Expected server configuration:
+
+```env
+NODE_ENV=production
+PORT=3000
+APP_VERSION=2.0.0
+QRV_PLATFORM_ORIGIN=https://qrv.network
+DATABASE_URL=
+DATABASE_POOL_MAX=20
+PG_CONNECTION_TIMEOUT_MS=5000
+PG_IDLE_TIMEOUT_MS=10000
+PGSSLMODE=require
+QRV_PLATFORM_API_KEY=
+CORS_ALLOWED_ORIGINS=https://qrv.network
+PUBLIC_RATE_WINDOW_MS=60000
+PUBLIC_RATE_LIMIT=240
+```
+
+Backend-only secrets such as webhook credentials, JWT signing secrets, and Ed25519 private keys belong on the API node when those capabilities are implemented.
+
+## Canonical datastore rule
+
+QR-V must have exactly **one writable canonical registry authority**.
+
+The current production contract is PostgreSQL / managed PostgreSQL through `DATABASE_URL` on `api.qrv.network`.
+
+Supabase may replace the persistence adapter later, but it must be an intentional migration, not an additional writable authority. If Supabase becomes canonical, only `api.qrv.network` may receive `SUPABASE_URL` and `SUPABASE_SECRET_KEY`.
+
+Do not operate Cloud SQL/PostgreSQL and Supabase as competing sources of truth.
 
 ## Legacy subdomain migration
 
-The following names are compatibility aliases only and should no longer require separate applications:
+The following names are compatibility aliases only:
 
 ```text
 verify.qrv.network      → qrv.network/verify
@@ -60,17 +155,11 @@ docs.qrv.network        → qrv.network/docs
 developers.qrv.network  → qrv.network/developers
 status.qrv.network      → qrv.network/status
 store.qrv.network       → qrv.network/store
+wallet.qrv.network      → qrv.network/wallet
+admin.qrv.network       → qrv.network/admin
 ```
 
-Point any legacy hostnames that must remain reachable to the same `qrv-node` deployment. The platform code issues HTTP 308 redirects to the canonical `qrv.network` path. This preserves old bookmarks and previously encoded verification URLs while eliminating separate runtime nodes.
-
-## Canonical QR payload
-
-New QR-V records should use:
-
-```text
-https://qrv.network/verify/{QRVID}
-```
+Where backward compatibility is required, point the hostname to the same `qrv-node` deployment and return HTTP **308** to the canonical path. Do not keep duplicate applications alive merely to preserve the hostname.
 
 ## Active repository responsibilities
 
@@ -80,27 +169,33 @@ https://qrv.network/verify/{QRVID}
 - verification UI;
 - registry/explorer UI;
 - issuer portal;
-- docs and developer pages;
-- pricing and store pages;
+- docs/developer pages;
+- pricing/store/billing UI;
 - public status;
 - QR generation;
-- compatibility redirects.
+- authenticated platform sessions;
+- legacy-host compatibility redirects.
 
 ### `qrv-api`
 
-- PostgreSQL connection;
+- canonical database connection;
 - registry migrations;
 - record issuance;
 - record lookup;
 - deterministic verification state;
-- revocation;
+- issuer authorization;
+- revocation/expiration lifecycle;
+- SHA-256 hashing;
+- Ed25519 signing/verification when enabled;
 - audit access;
 - server-side authorization;
-- health/readiness.
+- health/readiness;
+- rate limiting;
+- backend-only integrations and secrets.
 
 ## Source/archive repositories
 
-The following repositories remain useful as implementation history or migration sources but are no longer required as separate production nodes:
+These repositories remain implementation history, source modules, or migration inputs. They are **not independent production origins** under Architecture v1.0:
 
 - `qrv-verify`
 - `qrv-registry`
@@ -110,22 +205,31 @@ The following repositories remain useful as implementation history or migration 
 - `qrv-explorer`
 - `qrv-status`
 - `qrv-marketing-site`
+- `qrv-billing`
+- `qrv-admin`
+- `qrv-wallet`
 
-Do not delete them until the consolidated production acceptance test passes and all required content has been migrated.
+Do not delete source repositories until consolidated production acceptance passes and required content has been migrated.
+
+## Cryptographic status
+
+SHA-256 integrity support is active in the current implementation. Ed25519 issuer signing remains a required production gate.
+
+Do not claim full issuer-signed QRVP-1 cryptographic compliance until key management, signing, signature persistence, public-key verification, rotation, and invalid-signature fail-closed behavior are working end-to-end.
 
 ## Deployment order
 
-1. Deploy `qrv-api` with `DATABASE_URL` and `QRV_PLATFORM_API_KEY`.
-2. Run `npm run migrate` in `qrv-api`.
-3. Confirm `api.qrv.network/healthz` and `/readyz`.
-4. Deploy `qrv-node` to `qrv.network`.
-5. Configure the same `QRV_PLATFORM_API_KEY` on `qrv-node`.
-6. Configure `SESSION_SECRET` and `ISSUER_ACCESS_CODE` on `qrv-node`.
-7. Confirm `qrv.network/readyz`.
-8. Issue a certificate from `qrv.network/issuer`.
-9. Confirm `qrv.network/verify/{QRVID}` returns `VERIFIED`.
-10. Revoke the record and confirm the same URL returns `REVOKED`.
-11. Point legacy subdomains to the platform app if backward-compatible redirects are required.
+1. Back up the canonical registry.
+2. Map `api.qrv.network` to `ohi-stack/qrv-api`.
+3. Configure the API environment and database access.
+4. Run `npm run migrate` in `qrv-api`.
+5. Confirm API `/healthz` and `/readyz`.
+6. Validate create → verify → revoke → verify against the API.
+7. Deploy `ohi-stack/qrv-node` to `qrv.network`.
+8. Configure the platform server environment.
+9. Confirm platform `/healthz`, `/readyz`, `/version`, and canonical routes.
+10. Run the full issuer lifecycle through `qrv.network`.
+11. Enable legacy-host 308 redirects only after canonical routes are healthy.
 
 ## Mandatory production gate
 
@@ -135,9 +239,9 @@ ISSUER LOGIN
 → GENERATE QRVID
 → GENERATE QR
 → VERIFIED
-→ REVOKE
-→ REVOKED
+→ REVOKE / EXPIRE
+→ REVOKED / EXPIRED
 → AUDIT EVENTS PRESENT
 ```
 
-No additional public node is required for this lifecycle.
+Overall network status must not be presented as fully operational while the API node is misrouted, unavailable, or failing acceptance.
