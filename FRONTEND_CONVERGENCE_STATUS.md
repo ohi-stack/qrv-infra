@@ -1,62 +1,94 @@
 # QR-V™ Frontend Convergence Status
 
-**Status date:** September 6, 2026
+**Status date:** September 6, 2026  
+**State:** CONVERGED AND RUNTIME-ACTIVATED
 
 QR-V Production Architecture v1.0 remains a strict two-node deployment:
 
 ```text
 qrv.network               → ohi-stack/qrv-node
-api.qrv.network            → ohi-stack/qrv-api
+api.qrv.network           → ohi-stack/qrv-api
 ```
 
-The public Sites/marketing frontend is currently being migrated from `ohi-stack/qrv-marketing-site` into `ohi-stack/qrv-node` under PR #17 (`feat/sites-frontend-convergence`).
+The public QR-V customer frontend has now been converged from `ohi-stack/qrv-marketing-site` into `ohi-stack/qrv-node` and activated from the canonical production runtime.
 
-## Convergence rule
+Canonical activation commit:
 
-`qrv-node` remains authoritative for:
+```text
+ed8831a4a45c061a69400fe5aad75557b9cb9e4b
+```
 
-- Express production runtime;
+The exact runtime-activation branch passed both QR-V Platform Production CI and Production Readiness before merge.
+
+## Current runtime model
+
+```text
+qrv.network
+  React/Vite customer frontend
+  + Express production boundary
+        │
+        ▼
+api.qrv.network/api/v1
+  trusted API / data / registry authority
+```
+
+## qrv-node authority
+
+`qrv-node` is authoritative for:
+
+- React/Vite customer-facing presentation;
+- compiled frontend assets;
+- Express production server boundary;
 - server-side sessions and issuer authentication;
-- public verification logic and fail-closed behavior;
+- public verification routing and fail-closed behavior;
 - server-to-server API communication;
+- QR generation;
 - health/readiness/version endpoints;
 - legacy-host redirects;
 - security middleware and rate limiting;
 - production acceptance.
 
-`qrv-marketing-site` remains migration source for:
+## qrv-api authority
 
-- Sites visual system;
-- public/customer-facing React composition;
-- responsive styling;
-- SEO/public assets;
-- commercialization and content strategy;
+`qrv-api` remains authoritative for:
+
+- canonical registry persistence;
+- verification truth;
+- issuer authorization;
+- issuance/revocation mutations;
+- cryptographic signing/validation;
+- audit persistence;
+- privileged API credentials;
+- database and signing secrets.
+
+## qrv-marketing-site role
+
+`qrv-marketing-site` is now source/history/reference only. It retains:
+
+- original Sites visual system;
+- source React/Vite composition;
+- public content and commercialization strategy;
+- SEO source assets;
 - Sites provenance/manifests.
 
-The imported React/Vite source in `qrv-node` must never receive backend-only secrets. Its canonical API target is `https://api.qrv.network/api/v1`.
+It must not be deployed as a competing `qrv.network` production origin.
 
-## Production activation order
+## Remaining production acceptance
 
-1. Compile and validate the imported frontend in `qrv-node`.
-2. Preserve dynamic server ownership of `/verify/*`, `/issuer/*`, `/registry/*`, `/healthz`, `/readyz`, `/version`, compatibility API routes, and protected workflows.
-3. Serve compiled static assets only from the platform runtime.
-4. Validate SEO assets and canonical links.
-5. Run local/CI production validation.
-6. Run live acceptance against `qrv.network` and `api.qrv.network`.
-7. Only then mark `qrv-marketing-site` archive/source-history.
-
-## Required acceptance
+Frontend convergence is complete. Production acceptance still requires:
 
 ```text
-PUBLIC HOMEPAGE LOADS
-→ VERIFY ROUTE STILL USES AUTHORITATIVE API
-→ ISSUER LOGIN WORKS
-→ ISSUE RECORD
-→ GENERATE QRVID / QR
-→ VERIFIED
-→ REVOKE
-→ REVOKED
-→ HEALTH / READINESS REMAIN GREEN
+[ ] Hostinger maps qrv.network to ohi-stack/qrv-node/main
+[ ] public homepage serves the compiled frontend
+[ ] /healthz /readyz /version are green live
+[ ] verification route still resolves through api.qrv.network
+[ ] issuer login works live
+[ ] issue record
+[ ] generate QRVID / QR
+[ ] VERIFIED
+[ ] revoke
+[ ] REVOKED
+[ ] final visual/mobile/SEO parity review
 ```
 
-Frontend convergence must not alter QRVP-1/QVS-1.0 verification semantics or introduce a second writable/data authority.
+Frontend convergence does not alter QRVP-1/QVS-1.0 verification semantics and does not introduce a second writable/data authority.
