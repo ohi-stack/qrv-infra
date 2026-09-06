@@ -11,6 +11,17 @@
   "canonicalVerificationUrl": "https://qrv.network/verify/QRV-PROD-CERT-000001",
   "canonicalApiBaseUrl": "https://api.qrv.network/api/v1",
   "statusPage": "https://qrv.network/status",
+  "platformRuntime": {
+    "repository": "ohi-stack/qrv-node",
+    "frontend": "react-vite",
+    "reactMajor": 19,
+    "viteMajor": 6,
+    "serverBoundary": "express",
+    "buildOutput": "dist",
+    "customerFrontendActivated": true,
+    "activationCommit": "ed8831a4a45c061a69400fe5aad75557b9cb9e4b",
+    "sourceReferenceRepository": "ohi-stack/qrv-marketing-site"
+  },
   "canonicalDatastore": {
     "preferredType": "supabase-postgres",
     "supportedTypes": ["supabase-postgres", "postgres"],
@@ -36,7 +47,7 @@
   },
   "environmentContracts": {
     "platform": {
-      "requiredOrExpected": [
+      "serverRequiredOrExpected": [
         "NODE_ENV",
         "PORT",
         "APP_VERSION",
@@ -56,6 +67,17 @@
         "SESSION_TTL_MS",
         "LOG_LEVEL"
       ],
+      "browserSafeViteVariables": [
+        "VITE_APP_BASE_URL",
+        "VITE_QRV_API_BASE_URL",
+        "VITE_QRV_VERIFY_BASE_URL",
+        "VITE_QRV_REGISTRY_BASE_URL",
+        "VITE_QRV_ISSUER_BASE_URL",
+        "VITE_QRV_DOCS_BASE_URL",
+        "VITE_QRV_DEVELOPERS_BASE_URL",
+        "VITE_QRV_STATUS_BASE_URL",
+        "VITE_QRV_DEMO_QRVID"
+      ],
       "forbiddenSecretClasses": [
         "DATABASE_URL",
         "SUPABASE_SECRET_KEY",
@@ -63,7 +85,8 @@
         "QRV_WEBHOOK_SECRET",
         "database-admin-credentials",
         "payment-provider-secrets"
-      ]
+      ],
+      "viteSecretRule": "No privileged credential or secret may use the VITE_ prefix."
     },
     "api": {
       "requiredOrExpected": [
@@ -103,6 +126,9 @@
   "productionDelivery": {
     "platformHostname": "qrv.network",
     "platformRepository": "ohi-stack/qrv-node",
+    "platformFrontend": "react-vite",
+    "platformServerBoundary": "express",
+    "platformBuildOutput": "dist",
     "apiHostname": "api.qrv.network",
     "apiRepository": "ohi-stack/qrv-api",
     "singlePlatformOriginRequired": true,
@@ -123,6 +149,8 @@
       "baseUrl": "https://qrv.network",
       "role": "public-platform-node",
       "required": true,
+      "frontend": "react-vite",
+      "serverBoundary": "express",
       "routes": [
         "/",
         "/verify",
@@ -223,7 +251,9 @@
       "audit-events-present"
     ],
     "overallOperationalClaimRequiresApiAcceptance": true,
-    "overallOperationalClaimRequiresEd25519ForFullCryptographicCompliance": true
+    "overallOperationalClaimRequiresEd25519ForFullCryptographicCompliance": true,
+    "frontendConvergenceComplete": true,
+    "liveHostingerAcceptanceStillRequired": true
   },
-  "lastUpdated": "2026-09-05"
+  "lastUpdated": "2026-09-06"
 }
