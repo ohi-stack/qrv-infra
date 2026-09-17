@@ -1,7 +1,7 @@
 # QR-V™ Frontend Convergence Status
 
-**Status date:** September 6, 2026  
-**State:** CONVERGED AND RUNTIME-ACTIVATED
+**Status date:** September 17, 2026  
+**State:** CONVERGED AND MERGED; LIVE DEPLOYMENT ACCEPTANCE REMAINS
 
 QR-V Production Architecture v1.0 remains a strict two-node deployment:
 
@@ -10,27 +10,53 @@ qrv.network               → ohi-stack/qrv-node
 api.qrv.network           → ohi-stack/qrv-api
 ```
 
-The public QR-V customer frontend has now been converged from `ohi-stack/qrv-marketing-site` into `ohi-stack/qrv-node` and activated from the canonical production runtime.
+The public QR-V customer frontend is converged into `ohi-stack/qrv-node`. The canonical platform runtime now serves the compiled React/Vite Sites frontend while preserving the existing Express trust boundary.
 
-Canonical activation commit:
+Canonical runtime-convergence merge:
 
 ```text
-ed8831a4a45c061a69400fe5aad75557b9cb9e4b
+eaac061efd4c03d8d90714409414832682e3fec0
 ```
 
-The exact runtime-activation branch passed both QR-V Platform Production CI and Production Readiness before merge.
+The exact merge candidate passed both QR-V Platform Production CI and Production Readiness before merge.
 
 ## Current runtime model
 
 ```text
 qrv.network
-  React/Vite customer frontend
+  compiled React/Vite customer frontend
   + Express production boundary
         │
         ▼
 api.qrv.network/api/v1
   trusted API / data / registry authority
 ```
+
+## SPA / Express boundary
+
+Ordinary customer-facing HTML routes may use the compiled SPA. These operational route families remain Express-owned and are explicitly excluded from SPA fallback:
+
+```text
+/verify/*
+/issuer/*
+/registry/*
+/api/*
+/healthz
+/health
+/readyz
+/version
+/metrics
+/qr/*
+/explorer/*
+/status
+/robots.txt
+/sitemap.xml
+/site.webmanifest
+```
+
+Direct `/{QRVID}` compatibility URLs also bypass SPA fallback and keep their canonical 308 verification redirect.
+
+Legacy branded hostnames redirect before static/SPA handling so they cannot become competing runtime origins.
 
 ## qrv-node authority
 
@@ -48,6 +74,8 @@ api.qrv.network/api/v1
 - security middleware and rate limiting;
 - production acceptance.
 
+In production, `qrv-node` fails startup if the compiled frontend is missing. The required deployment contract is build first, then start.
+
 ## qrv-api authority
 
 `qrv-api` remains authoritative for:
@@ -63,25 +91,17 @@ api.qrv.network/api/v1
 
 ## qrv-marketing-site role
 
-`qrv-marketing-site` is now source/history/reference only. It retains:
+`qrv-marketing-site` is source/history/reference only. It must not be deployed as a competing `qrv.network` production origin.
 
-- original Sites visual system;
-- source React/Vite composition;
-- public content and commercialization strategy;
-- SEO source assets;
-- Sites provenance/manifests.
+## Remaining live-production acceptance
 
-It must not be deployed as a competing `qrv.network` production origin.
-
-## Remaining production acceptance
-
-Frontend convergence is complete. Production acceptance still requires:
+Frontend runtime convergence is merged. Production acceptance still requires:
 
 ```text
-[ ] Hostinger maps qrv.network to ohi-stack/qrv-node/main
+[ ] Hostinger maps qrv.network to ohi-stack/qrv-node/main at or after eaac061
 [ ] public homepage serves the compiled frontend
-[ ] /healthz /readyz /version are green live
-[ ] verification route still resolves through api.qrv.network
+[ ] /healthz /readyz /version behave correctly live
+[ ] verification resolves through api.qrv.network
 [ ] issuer login works live
 [ ] issue record
 [ ] generate QRVID / QR
