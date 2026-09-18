@@ -1,7 +1,7 @@
-# QR-V™ Frontend & Multi-Builder Convergence Status
+# QR-V™ Frontend, Sitemap & Multi-Builder Convergence Status
 
-**Status date:** September 17, 2026  
-**State:** RUNTIME CONVERGED; MULTI-BUILDER DEVELOPMENT MODEL ACTIVE; LIVE DEPLOYMENT ACCEPTANCE REMAINS
+**Status date:** September 18, 2026  
+**State:** RUNTIME CONVERGED; AUTHORITATIVE SITEMAP MERGED; MULTI-BUILDER MODEL ACTIVE; LIVE DEPLOYMENT ACCEPTANCE REMAINS
 
 QR-V Production Architecture remains a strict two-node deployment:
 
@@ -24,6 +24,37 @@ Canonical multi-builder environment:
 4e9dd06e7c164b61ec586c54f2c3578192ef5bb3
 ```
 
+Canonical production sitemap alignment:
+
+```text
+0949815c020e7f27f388f48f696bd931a6504b0a
+```
+
+## Sitemap authority
+
+The public platform route architecture is now governed by:
+
+```text
+qrv-node/config/routes.manifest.json
+qrv-node/docs/PRODUCTION_SITEMAP.md
+```
+
+`config/routes.manifest.json` is the machine-readable public route/tier contract. The exact machine API contract remains governed by OpenAPI in `qrv-api` once the normative specification is complete.
+
+The production header contract is:
+
+```text
+Products · Solutions · Developers · Documentation · Pricing · About
+```
+
+Actions:
+
+```text
+Verify Record · Issuer Login · Get Started
+```
+
+A route definition does not mean the corresponding product capability is operational. Production capability requires implementation, integration, documentation, testing, and repeatability.
+
 ## Development lanes
 
 ```text
@@ -40,7 +71,7 @@ integration/multi-builder
   conflict resolution / validation / release candidate assembly
 ```
 
-All three development branches are synchronized to the multi-builder baseline above.
+All three development branches are synchronized to `0949815c020e7f27f388f48f696bd931a6504b0a`.
 
 Local lane ports:
 
@@ -97,6 +128,7 @@ work/chatgpt-sites ──────┐
                          ├─→ integration/multi-builder
 work/google-ai-studio ───┘
                                   ↓
+                         npm run check:sitemap
                          npm run validate:prod
                                   ↓
                                 main
@@ -109,8 +141,10 @@ No builder branch should deploy directly to `qrv.network`.
 ## Remaining live-production acceptance
 
 ```text
-[ ] Hostinger maps qrv.network to ohi-stack/qrv-node/main at or after 4e9dd06
+[ ] Hostinger maps qrv.network to ohi-stack/qrv-node/main at or after 0949815
 [ ] public homepage serves the compiled frontend
+[ ] runtime header matches the canonical six-area navigation contract
+[ ] Tier 1 routes render intended content instead of generic SPA fallback
 [ ] /healthz /readyz /version behave correctly live
 [ ] verification resolves through api.qrv.network
 [ ] issuer login works live
@@ -119,6 +153,7 @@ No builder branch should deploy directly to `qrv.network`.
 [ ] VERIFIED
 [ ] revoke
 [ ] REVOKED
+[ ] normative OpenAPI specification exists for qrv-api
 [ ] final visual/mobile/SEO parity review
 ```
 
