@@ -1,40 +1,74 @@
-# QR-V™ Frontend Convergence Status
+# QR-V™ Frontend & Multi-Builder Convergence Status
 
 **Status date:** September 17, 2026  
-**State:** CONVERGED AND MERGED; LIVE DEPLOYMENT ACCEPTANCE REMAINS
+**State:** RUNTIME CONVERGED; MULTI-BUILDER DEVELOPMENT MODEL ACTIVE; LIVE DEPLOYMENT ACCEPTANCE REMAINS
 
-QR-V Production Architecture v1.0 remains a strict two-node deployment:
+QR-V Production Architecture remains a strict two-node deployment:
 
 ```text
 qrv.network               → ohi-stack/qrv-node
 api.qrv.network           → ohi-stack/qrv-api
 ```
 
-The public QR-V customer frontend is converged into `ohi-stack/qrv-node`. The canonical platform runtime now serves the compiled React/Vite Sites frontend while preserving the existing Express trust boundary.
+The public QR-V frontend is converged into `qrv-node`. The compiled React/Vite Sites frontend is served by the canonical Express platform runtime while protected operational routes remain server-owned.
 
-Canonical runtime-convergence merge:
+Canonical runtime convergence:
 
 ```text
 eaac061efd4c03d8d90714409414832682e3fec0
 ```
 
-The exact merge candidate passed both QR-V Platform Production CI and Production Readiness before merge.
-
-## Current runtime model
+Canonical multi-builder environment:
 
 ```text
-qrv.network
-  compiled React/Vite customer frontend
-  + Express production boundary
-        │
-        ▼
-api.qrv.network/api/v1
-  trusted API / data / registry authority
+4e9dd06e7c164b61ec586c54f2c3578192ef5bb3
 ```
+
+## Development lanes
+
+```text
+main
+  production only
+
+work/chatgpt-sites
+  customer-facing UI / UX / content / responsive / accessibility / SEO presentation
+
+work/google-ai-studio
+  isolated full-stack / Gemini / interactive workflow / developer-tool experiments
+
+integration/multi-builder
+  conflict resolution / validation / release candidate assembly
+```
+
+All three development branches are synchronized to the multi-builder baseline above.
+
+Local lane ports:
+
+```text
+ChatGPT Sites      Vite 3101   Express 3201
+Google AI Studio   Vite 3102   Express 3202
+Integration        Vite 3103   Express 3203
+```
+
+## Trust boundary
+
+The development environments do not become independent QR-V authorities.
+
+```text
+builder preview
+    ↓
+qrv-node Express boundary
+    ↓
+api.qrv.network/api/v1
+    ↓
+canonical registry
+```
+
+Experimental environments default closed and must not receive production registry, signing, database, payment, or privileged API secrets.
 
 ## SPA / Express boundary
 
-Ordinary customer-facing HTML routes may use the compiled SPA. These operational route families remain Express-owned and are explicitly excluded from SPA fallback:
+Ordinary customer-facing HTML routes may use the compiled SPA. These operational route families remain Express-owned:
 
 ```text
 /verify/*
@@ -54,51 +88,28 @@ Ordinary customer-facing HTML routes may use the compiled SPA. These operational
 /site.webmanifest
 ```
 
-Direct `/{QRVID}` compatibility URLs also bypass SPA fallback and keep their canonical 308 verification redirect.
+Direct `/{QRVID}` compatibility URLs also bypass SPA fallback.
 
-Legacy branded hostnames redirect before static/SPA handling so they cannot become competing runtime origins.
+## Promotion model
 
-## qrv-node authority
+```text
+work/chatgpt-sites ──────┐
+                         ├─→ integration/multi-builder
+work/google-ai-studio ───┘
+                                  ↓
+                         npm run validate:prod
+                                  ↓
+                                main
+                                  ↓
+                             qrv.network
+```
 
-`qrv-node` is authoritative for:
-
-- React/Vite customer-facing presentation;
-- compiled frontend assets;
-- Express production server boundary;
-- server-side sessions and issuer authentication;
-- public verification routing and fail-closed behavior;
-- server-to-server API communication;
-- QR generation;
-- health/readiness/version endpoints;
-- legacy-host redirects;
-- security middleware and rate limiting;
-- production acceptance.
-
-In production, `qrv-node` fails startup if the compiled frontend is missing. The required deployment contract is build first, then start.
-
-## qrv-api authority
-
-`qrv-api` remains authoritative for:
-
-- canonical registry persistence;
-- verification truth;
-- issuer authorization;
-- issuance/revocation mutations;
-- cryptographic signing/validation;
-- audit persistence;
-- privileged API credentials;
-- database and signing secrets.
-
-## qrv-marketing-site role
-
-`qrv-marketing-site` is source/history/reference only. It must not be deployed as a competing `qrv.network` production origin.
+No builder branch should deploy directly to `qrv.network`.
 
 ## Remaining live-production acceptance
 
-Frontend runtime convergence is merged. Production acceptance still requires:
-
 ```text
-[ ] Hostinger maps qrv.network to ohi-stack/qrv-node/main at or after eaac061
+[ ] Hostinger maps qrv.network to ohi-stack/qrv-node/main at or after 4e9dd06
 [ ] public homepage serves the compiled frontend
 [ ] /healthz /readyz /version behave correctly live
 [ ] verification resolves through api.qrv.network
@@ -111,4 +122,4 @@ Frontend runtime convergence is merged. Production acceptance still requires:
 [ ] final visual/mobile/SEO parity review
 ```
 
-Frontend convergence does not alter QRVP-1/QVS-1.0 verification semantics and does not introduce a second writable/data authority.
+This architecture does not alter QRVP-1/QVS-1.0 semantics and does not introduce a second writable registry.
