@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0",
+  "effectiveDate": "2026-09-17",
+  "canonicalPlatform": "https://qrv.network",
+  "canonicalApi": "https://api.qrv.network",
+  "redirects": [
+    {
+      "host": "verify.qrv.network",
+      "target": "https://qrv.network/verify",
+      "status": 308
+    },
+    {
+      "host": "registry.qrv.network",
+      "target": "https://qrv.network/registry",
+      "status": 308
+    },
+    {
+      "host": "issuer.qrv.network",
+      "target": "https://qrv.network/issuer",
+      "status": 308
+    },
+    {
+      "host": "docs.qrv.network",
+      "target": "https://qrv.network/docs",
+      "status": 308
+    },
+    {
+      "host": "developers.qrv.network",
+      "target": "https://qrv.network/developers",
+      "status": 308
+    },
+    {
+      "host": "explorer.qrv.network",
+      "target": "https://qrv.network/explorer",
+      "status": 308
+    }
+  ],
+  "activationRule": "Enable permanent compatibility redirects only after canonical route parity, health/readiness, and live acceptance pass."
+}
